@@ -1,20 +1,58 @@
-Mojolicious-Plugin-InputValidation
+# Mojolicious::Plugin::InputValidation - Validate incoming requests
 
-INSTALLATION
+# SYNOPSIS
+
+```perl
+  use Mojolicious::Lite;
+  plugin 'InputValidation';
+
+  # This needs to be done where one wants to use the iv_* routines.
+  use Mojolicious::Plugin::InputValidation;
+
+  post '/books' => sub {
+      my $c = shift;
+
+      # Validate incoming requests against our data model.
+      if (my $error = $c->validate_json_request({
+          title    => iv_any,
+          abstract => iv_any(optional => 1),
+          author   => {
+              firstname => iv_word,
+              lastname  => iv_word,
+          },
+          published => iv_datetime,
+          price     => iv_float,
+          revision  => iv_int,
+          isbn      => iv_any(pattern => qr/^[0-9\-]{10,13}$/),
+      })) {
+          return $c->render(status => 400, text => $error);
+      }
+
+      # Now the payload is safe to use.
+      my $payload = $c->req->json;
+      ...
+  };
+```
+
+# INSTALLATION
 
 To install this module, run the following commands:
 
+```sh
 	perl Makefile.PL
 	make
 	make test
 	make install
+```
 
-SUPPORT AND DOCUMENTATION
+# SUPPORT AND DOCUMENTATION
 
 After installing, you can find documentation for this module with the
 perldoc command.
 
+```sh
     perldoc Mojolicious::Plugin::InputValidation
+```
 
 You can also look for information at:
 
@@ -31,7 +69,7 @@ You can also look for information at:
         https://metacpan.org/release/Mojolicious-Plugin-InputValidation
 
 
-LICENSE AND COPYRIGHT
+# LICENSE AND COPYRIGHT
 
 Copyright (C) 2018 Tobias Leich
 
@@ -39,7 +77,7 @@ This program is free software; you can redistribute it and/or modify it
 under the terms of the the Artistic License (2.0). You may obtain a
 copy of the full license at:
 
-L<http://www.perlfoundation.org/artistic_license_2_0>
+http://www.perlfoundation.org/artistic_license_2_0
 
 Any use, modification, and distribution of the Standard or Modified
 Versions is governed by this Artistic License. By using, modifying or
